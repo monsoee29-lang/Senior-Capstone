@@ -2,7 +2,7 @@
 
 A data-driven web platform exploring the link between single-use plastic consumption and carbon emissions across Myanmar — built as a senior capstone thesis project at Parami University.
 
-🔗 **Live site:** [https://monsoee29-lang.github.io](https://github.com/monsoee29-lang) *(update with your actual GitHub Pages URL)*
+🔗 **Live site:** https://monsoee29-lang.github.io/Senior-Capstone/
 
 ---
 
@@ -48,7 +48,6 @@ This platform presents the public-facing output of a capstone research project c
 ├── style.css
 ├── eda_development.ipynb
 └── Survey_Dataset_Ei Mon Soe.csv
-└── images 
 
 ---
 
@@ -86,7 +85,7 @@ open index.html
 ## 👩‍🎓 Researcher
 
 **Ei Mon Soe**  
-Bachelor of Data Science · Division of Mathematics and Science · Parami University  
+Bachelor of Statistics and Data Science · Division of Mathematics and Science · Parami University  
 Student ID: PIUS 20220035
 
 Supervised by **Dr. Mohamed Megheib** · Advised by **Dr. Nwe Nwe Htay Win**
