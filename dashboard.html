@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Dashboard - Myanmar Plastic</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <style>
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; margin: 0; background-color: #f4f7f6; color: #333; }
+        header { background: white; padding: 1rem 5%; display: flex; justify-content: flex-end; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        nav { display: flex; gap: 25px; align-items: center; }
+        nav a { text-decoration: none; color: #555; font-weight: 500; }
+        nav a.nav-link:hover { background: #e8f5e9; color: #2E7D32; padding: 6px 12px; border-radius: 6px; }
+        nav a.nav-link.active { background: #e8f5e9; color: #2E7D32; font-weight: 700; padding: 6px 12px; border-radius: 6px; }
+        .connect-btn { background-color: #2E7D32; color: white; padding: 8px 18px; border-radius: 20px; text-decoration: none; font-size: 0.8rem; font-weight: bold; }
+        .container { padding: 40px 5%; }
+        h2 { text-align: center; color: #1B5E20; margin-bottom: 30px; }
+
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        .chart-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .chart-card.full-width {
+            grid-column: 1 / -1;
+        }
+
+        #map { height: 500px; width: 100%; border-radius: 10px; border: 1px solid #ccc; }
+
+        h3 { color: #2E7D32; font-size: 1.05rem; text-align: center; margin-bottom: 15px; }
+        canvas { max-width: 100%; height: 320px !important; }
+
+        /* Heatmap */
+        #heatmap-container { display: grid; grid-template-columns: 140px 1fr; gap: 5px; padding: 10px; }
+        #heatmap-labels { display: flex; flex-direction: column; justify-content: space-around; font-weight: bold; font-size: 0.78rem; text-align: right; padding-right: 12px; }
+        #heatmap-col-labels { display: grid; grid-template-columns: repeat(5, 1fr); text-align: center; font-weight: bold; font-size: 0.75rem; margin-bottom: 8px; }
+        #heatmap-grid { display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(5, 1fr); height: 220px; border: 1px solid #eee; border-radius: 6px; overflow: hidden; }
+
+        /* Horizontal bar */
+        .hbar-wrap { padding: 0 10px; }
+        .hbar-row { display: flex; align-items: center; margin-bottom: 10px; font-size: 0.82rem; }
+        .hbar-label { width: 160px; text-align: right; padding-right: 10px; color: #444; flex-shrink: 0; }
+        .hbar-track { flex: 1; background: #f0f0f0; border-radius: 4px; height: 22px; overflow: hidden; position: relative; }
+        .hbar-fill { height: 100%; border-radius: 4px; display: flex; align-items: center; justify-content: flex-end; padding-right: 6px; font-size: 0.75rem; font-weight: bold; color: white; transition: width 0.8s ease; }
+
+        /* Stacked horizontal bar for region usage */
+        .stacked-row { display: flex; align-items: center; margin-bottom: 9px; font-size: 0.78rem; }
+        .stacked-label { width: 150px; text-align: right; padding-right: 10px; flex-shrink: 0; color: #444; }
+        .stacked-bar { flex: 1; display: flex; height: 22px; border-radius: 4px; overflow: hidden; }
+        .stacked-seg { display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: bold; color: white; }
+        .stacked-seg.dark-text { color: #333; }
+
+        /* Perception gap bars */
+        .pgap-row { display: flex; align-items: center; margin-bottom: 8px; font-size: 0.82rem; }
+        .pgap-label { width: 150px; text-align: right; padding-right: 10px; color: #444; flex-shrink: 0; }
+        .pgap-bars { flex: 1; display: flex; gap: 4px; }
+        .pgap-seg { height: 20px; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: bold; color: white; }
+
+        p.note { font-size: 0.8rem; color: #777; margin-top: 10px; text-align: center; }
+
+        /* Legend */
+        .legend { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 10px; font-size: 0.78rem; }
+        .legend-item { display: flex; align-items: center; gap: 5px; }
+        .legend-dot { width: 12px; height: 12px; border-radius: 2px; }
+    </style>
+</head>
+<body>
+
+ <header>
+        <nav>
+            <a href="index.html"    class="nav-link">Home</a>
+            <a href="dashboard.html" class="nav-link active">EDA Dashboard</a>
+            <a href="tracker.html"  class="nav-link">CO2 Tracker</a>
+            <a href="research.html" class="nav-link">About Project</a>
+            <a href="https://www.linkedin.com/in/ei-mon-soe-6aa022257/" class="connect-btn">Connect On Linkedin</a>
+        </nav>
+    </header>
+
+<div class="container">
+    <h2>Interactive Data Exploration</h2>
+
+    <!-- CHART 1: MAP (unchanged) -->
+    <div class="chart-card" style="margin-bottom: 25px;">
+        <h3>Interactive Survey Map: Responses by Region</h3>
+        <div id="map"></div>
+        <p class="note">Click on a region to see the exact count.</p>
+    </div>
+
+    <!-- CHART 2: Heatmap -->
+    <div class="chart-card" style="margin-bottom: 25px;">
+        <h3>Environmental Awareness vs. Daily Plastic Usage</h3>
+        <div style="overflow-x: auto;">
+            <div id="heatmap-container" style="min-width: 560px;">
+                <div id="heatmap-labels">
+                    <div>Very aware</div>
+                    <div>Somewhat aware</div>
+                    <div>Neutral</div>
+                    <div>Slightly aware</div>
+                    <div>Not aware</div>
+                </div>
+                <div>
+                    <div id="heatmap-col-labels">
+                        <div>0 items</div><div>1-2 items</div><div>3-5 items</div><div>6-10 items</div><div>10+ items</div>
+                    </div>
+                    <div id="heatmap-grid"></div>
+                </div>
+            </div>
+        </div>
+        <p class="note">Values show distribution of plastic usage within each awareness level.</p>
+    </div>
+
+    <!-- CHARTS 3 & 4 -->
+    <div class="chart-grid">
+        <div class="chart-card">
+            <h3>The Involuntary Plastic Footprint of Street Food</h3>
+            <canvas id="streetFoodChart"></canvas>
+        </div>
+        <div class="chart-card">
+            <h3>Regional Waste Fate Perceptions</h3>
+            <canvas id="wasteFateChart"></canvas>
+        </div>
+    </div>
+
+    <!-- CHARTS 5 & 6 -->
+    <div class="chart-grid">
+        <div class="chart-card">
+            <h3>Support for Plastic Reduction Alternatives Across Age Groups</h3>
+            <canvas id="generationalChart"></canvas>
+        </div>
+        <div class="chart-card">
+            <h3>Belief in Waste Burning vs. Understanding of GHG Effects</h3>
+            <canvas id="burnGhgChart"></canvas>
+        </div>
+    </div>
+
+    <!-- CHART 7: Region Usage (full width stacked) -->
+    <div class="chart-card" style="margin-bottom: 25px;">
+        <h3>Plastic Consumption Intensity Across Regions</h3>
+        <div class="hbar-wrap" id="regionUsageChart"></div>
+        <div class="legend" id="regionUsageLegend"></div>
+        <p class="note">Sorted by proportion of heavy users (6-10 + 10+ items/week). Numbers in brackets = respondents.</p>
+    </div>
+
+    <!-- CHARTS 8 & 9 -->
+    <div class="chart-grid">
+        <div class="chart-card">
+            <h3>Educational Influence on the Temporal Perception of Climate Change Impacts</h3>
+            <canvas id="educationTimelineChart"></canvas>
+        </div>
+        <div class="chart-card">
+            <h3>Plastic Consumption Patterns Across Education Levels</h3>
+            <canvas id="educationUsageChart"></canvas>
+        </div>
+    </div>
+
+    <!-- CHART 10: Primary Sources (horizontal bar) -->
+    <div class="chart-card" style="margin-bottom: 25px;">
+        <h3>Primary Sources of Single-Use Plastic in Myanmar</h3>
+        <div class="hbar-wrap" id="sourcesChart"></div>
+        <p class="note">Frequency of mention across all survey respondents.</p>
+    </div>
+
+    <!-- CHART 11: Personal Perception Gap -->
+<div class="chart-card" style="margin-bottom: 25px; min-height: 580px;">
+    <h3>The Perception Gap: Self-Assessment vs. Actual Plastic Bag Use</h3>
+    <canvas id="perceptionGapChart" style="height: 600px !important;"></canvas>
+    <p class="note">Each group shows how their self-perceived usage level compares to reported weekly bag counts.</p>
+</div>
+
+</div>
+
+<script>
+    
+// ===================== MAP (UNCHANGED) =====================
+var map = L.map('map').setView([21.9162, 95.9560], 6);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(map);
+function getColor(d) {
+    return d > 80 ? '#800026' : d > 50 ? '#BD0026' : d > 20 ? '#E31A1C' : d > 10 ? '#FC4E2A' : d > 5 ? '#FD8D3C' : '#FFEDA0';
+}
+function style(feature) {
+    return { fillColor: getColor(feature.properties.Survey_Count), weight: 2, opacity: 1, color: 'white', dashArray: '3', fillOpacity: 0.7 };
+}
+fetch('myanmar.json').then(r => r.json()).then(data => {
+    L.geoJson(data, {
+        style: style,
+        onEachFeature: function(feature, layer) {
+            layer.bindPopup('<strong>' + feature.properties.ST + '</strong><br/>' + feature.properties.Survey_Count + ' Responses');
+            layer.on('mouseover', function() { this.setStyle({ weight: 5, color: '#666', dashArray: '', fillOpacity: 0.9 }); });
+            layer.on('mouseout', function() { this.setStyle(style(feature)); });
+        }
+    }).addTo(map);
+});
+
+// ===================== HEATMAP =====================
+const heatmapData = [
+    [0.014, 0.241, 0.447, 0.177, 0.121],
+    [0.043, 0.283, 0.424, 0.152, 0.098],
+    [0.059, 0.471, 0.353, 0.059, 0.059],
+    [0.0,   0.167, 0.542, 0.167, 0.125],
+    [0.077, 0.231, 0.385, 0.154, 0.154]
+];
+const grid = document.getElementById('heatmap-grid');
+heatmapData.forEach(row => {
+    row.forEach(val => {
+        const cell = document.createElement('div');
+        const intensity = val * 1.8;
+        cell.style.cssText = `background:rgba(200,30,30,${intensity});border:0.5px solid #fff;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:bold;color:${val > 0.4 ? 'white' : '#333'}`;
+        cell.innerText = (val * 100).toFixed(1) + '%';
+        grid.appendChild(cell);
+    });
+});
+
+// ===================== CHART 3: STREET FOOD =====================
+new Chart(document.getElementById('streetFoodChart'), {
+    type: 'bar',
+    data: {
+        labels: ['Always','Sometimes', 'Rarely', 'Never'],
+        datasets: [{ label: 'Respondents', data: [223, 73, 7, 1], backgroundColor: ['rgba(200,30,30,0.85)', 'rgba(200,30,30,0.7)', 'rgba(200,30,30,0.55)', 'rgba(200,30,30,0.4)', 'rgba(200,30,30,0.25)'], borderColor: 'rgba(200,30,30,1)', borderWidth: 1 }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: false } }, scales: { y: { beginAtZero: true, title: { display: true, text: 'Number of Respondents' } } } }
+});
+
+// ===================== CHART 4: WASTE FATE =====================
+new Chart(document.getElementById('wasteFateChart'), {
+    type: 'bar',
+    data: {
+        labels: [
+            'Yangon', 'Rakhine', 'Mandalay', 'Sagaing', 'Shan',
+            'Bago', 'Ayeyarwady', 'Magway', 'Mon', 'Kayin',
+            'Kachin', 'Tanintharyi', 'Kayah', 'Chin'
+        ],
+        datasets: [
+            {
+                label: 'Believes Waste is Burned',
+                data: [37, 46, 19, 13, 11, 9, 7, 8, 6, 4, 3, 3, 4, 3],
+                backgroundColor: '#333333'
+            },
+            {
+                label: 'Believes Waste is Landfilled',
+                data: [52, 46, 21, 14, 14, 9, 8, 7, 7, 2, 4, 3, 2, 4],
+                backgroundColor: '#FFD700'
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            datalabels: {
+                anchor: 'end',
+                align: 'end',
+                color: '#000000',
+                font: { size: 9, weight: 'bold' },
+                formatter: value => value
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                title: { display: true, text: 'Number of "Yes" Responses' }
+            },
+            x: {
+                ticks: { maxRotation: 45, minRotation: 45 }
+            }
+        }
+    }
+});
+   
+
+// ===================== CHART 5: GENERATIONAL SUPPORT =====================
+new Chart(document.getElementById('generationalChart'), {
+    type: 'bar',
+    data: {
+        labels: ['18-25', '26-35', '36-50', 'Over 50'],
+        datasets: [
+            { label: 'Support',          data: [37, 16, 7,  0], backgroundColor: '#2D1B69' },
+            { label: 'Strongly Support', data: [119, 50, 26, 4], backgroundColor: '#7B2D8B' },
+            { label: 'Neutral',          data: [33, 4,  0,  2], backgroundColor: '#C2577A' },
+            { label: 'Strongly Oppose',  data: [3,  0,  0,  0], backgroundColor: '#E8825A' },
+            { label: 'Oppose',           data: [2,  1,  0,  0], backgroundColor: '#F2C48D' }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            x: {
+                stacked: false,
+                title: { display: true, text: 'Age Group', font: { size: 12 } }
+            },
+            y: {
+                stacked: false,
+                beginAtZero: true,
+                title: { display: true, text: 'Number of Respondents', font: { size: 12 } }
+            }
+        },
+        plugins: {
+            legend: {
+                position: 'top',
+                align: 'end',
+                title: { display: true, text: 'Support for Reduction', font: { size: 11, weight: 'bold' } },
+                labels: { boxWidth: 12, font: { size: 10 } }
+            },
+            datalabels: { display: false }
+        }
+    }
+});
+    
+     
+
+// ===================== CHART 6: BURN PERCEPTION VS GHG =====================
+new Chart(document.getElementById('burnGhgChart'), {
+    type: 'bar',
+    data: {
+        labels: ['Yes', 'No'],
+        datasets: [
+            { label: 'Release GHG',  data: [27, 60], backgroundColor: '#3B4CC0' },
+            { label: 'Increases the Earth’s temperature', data: [41, 46],  backgroundColor: '#7B9FF9' },
+            { label: 'Pollutes soil/water',               data: [50, 57],  backgroundColor: '#F4A582' },
+            { label: 'Doesn’t affect climate change',                    data: [9, 11],   backgroundColor: '#B2182B' },
+            { label: 'Not sure',                          data: [1, 2], backgroundColor: '#AAAAAA' }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            x: {
+                stacked: false,   // grouped, not stacked
+                title: { display: true, text: 'Public Perception of Plastic Disposal (Burning)', font: { size: 12 } }
+            },
+            y: {
+                stacked: false,
+                beginAtZero: true,
+                title: { display: true, text: 'Number of Respondents', font: { size: 12 } }
+            }
+        },
+        plugins: {
+            legend: {
+                position: 'right',   // matches bbox_to_anchor on the right
+                title: { display: true, text: 'Understanding of GHG Effects', font: { size: 11, weight: 'bold' } },
+                labels: { boxWidth: 12, font: { size: 10 } }
+            },
+            datalabels: { display: false }
+        }
+    }
+});
+
+// ===================== CHART 7: REGION USAGE STACKED =====================
+const regionData = [
+    { name: 'Yangon (88)',    pct: [4,  15, 50, 15,  16] },
+    { name: 'Rakhine (60)',   pct: [5,  45, 37, 10, 3] },
+    { name: 'Sagaing (26)',   pct: [4,  23, 50, 19, 4] },
+    { name: 'Shan (20)',      pct: [5,  25, 38, 20, 12] },
+    { name: 'Magway (12)',    pct: [8,  17, 42, 33, 0] },
+    { name: 'Mandalay (27)',  pct: [0,  22, 33, 26,  19] },
+    { name: 'Ayeyarwady (13)', pct: [0, 15, 46, 23,  15] },
+    { name: 'Bago (14)',      pct: [0,  43, 29, 0,  29] },
+    { name: 'Mon (11)',       pct: [0,  27, 64, 0,  9] },
+    { name: 'Kayin (9)',      pct: [0,  22, 44, 33,  0] },
+    { name: 'Kachin (7)',     pct: [0, 43, 57,  0,  0] },
+    { name: 'Tanintharyi (6)',pct: [0,  33, 33,  0,  33] },
+    { name: 'Kayah (6)',      pct: [0, 22, 44,  33,  0] },
+    { name: 'Chin (5)',       pct: [0, 20, 60,  20,  0] }
+];
+const stackColors = ['#1a9850','#91cf60','#fee08b','#fc8d59','#d73027'];
+const stackLabels = ['0 items','1-2','3-5','6-10','10+'];
+const container = document.getElementById('regionUsageChart');
+regionData.forEach(r => {
+    const row = document.createElement('div');
+    row.className = 'stacked-row';
+    row.innerHTML = `<div class="stacked-label">${r.name}</div><div class="stacked-bar">` +
+        r.pct.map((p, i) => `<div class="stacked-seg${i === 1 || i === 2 ? ' dark-text' : ''}" style="width:${p}%;background:${stackColors[i]}" title="${stackLabels[i]}: ${p}%">${p > 7 ? p + '%' : ''}</div>`).join('') +
+        `</div>`;
+    container.appendChild(row);
+});
+const legend = document.getElementById('regionUsageLegend');
+stackLabels.forEach((l, i) => {
+    legend.innerHTML += `<div class="legend-item"><div class="legend-dot" style="background:${stackColors[i]}"></div>${l}</div>`;
+});
+
+// ===================== CHART 8: EDUCATION VS IMPACT TIMELINE =====================
+new Chart(document.getElementById('educationTimelineChart'), {
+    type: 'bar',
+    data: {
+        labels: ['University/College', 'High school', 'Postgraduate', 'No formal education', 'Vocational Training',  'Middle school', 'Primary school'],
+        datasets: [
+            { label: 'Already visible now',   data: [79, 45, 20, 1, 6, 5, 2], backgroundColor: '#03051A' },
+            { label: 'More than 10 years',      data: [19, 3, 6, 0, 2, 0, 0], backgroundColor: '#5C1049' },
+            { label: 'Within 3-5 years',      data: [19, 13, 5, 0, 0, 1, 0], backgroundColor: '#BC3754' },
+            { label: 'Not sure',     data: [25, 9, 3, 0, 1, 0, 0], backgroundColor: '#F1834C' },
+            { label: 'Within 1-2 years',    data: [13, 1, 2, 0, 0, 0, 0], backgroundColor: '#FCFEA4' },
+            { label: 'Within 6-10 years',              data: [10, 4, 6, 1, 2, 1, 0], backgroundColor: '#808080' }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            x: {
+                stacked: false,
+                title: { display: true, text: 'Education Level', font: { size: 12 } },
+                ticks: { maxRotation: 45, minRotation: 45 }
+            },
+            y: {
+                stacked: false,
+                beginAtZero: true,
+                title: { display: true, text: 'Number of Respondents', font: { size: 12 } }
+            }
+        },
+        plugins: {
+            legend: {
+                position: 'top',
+                align: 'end',
+                title: { display: true, text: 'When will we feel the impact?', font: { size: 11, weight: 'bold' } },
+                labels: { boxWidth: 12, font: { size: 10 } }
+            },
+            datalabels: { display: false }
+        }
+    }
+});
+
+// ===================== CHART 9: EDUCATION VS WEEKLY USAGE =====================
+new Chart(document.getElementById('educationUsageChart'), {
+    type: 'bar',
+    data: {
+        labels: ['0 items', '1-2 items', '3-5 items', '6-10 items', '10+ items'],
+        datasets: [
+            { label: 'University/College',  data: [4, 50, 74, 24, 13], backgroundColor: '#E41A1C' },
+            { label: 'High school',         data: [4, 19, 27, 15, 10], backgroundColor: '#377EB8' },
+            { label: 'Postgraduate',        data: [1, 5, 23, 7, 6], backgroundColor: '#4DAF4A' },
+            { label: 'No formal education', data: [0, 1, 1, 0, 0], backgroundColor: '#984EA3' },
+            { label: 'Vocational Training', data: [0, 5, 3, 0, 3], backgroundColor: '#FF7F00' },
+            { label: 'Middle school',       data: [0, 3, 3, 0, 1], backgroundColor: '#A65628' },
+            { label: 'Primary school',      data: [0, 0, 1, 1, 0], backgroundColor: '#F781BF' }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            x: { title: { display: true, text: 'Weekly Plastic Items Used', font: { size: 12 } } },
+            y: { beginAtZero: true, title: { display: true, text: 'Number of Respondents', font: { size: 12 } } }
+        },
+        plugins: {
+            legend: {
+                position: 'top',
+                align: 'end',
+                title: { display: true, text: 'Education Level', font: { size: 11, weight: 'bold' } },
+                labels: { boxWidth: 12, font: { size: 10 } }
+            },
+            datalabels: { display: false }
+        }
+    }
+});
+
+// ===================== CHART 10: SOURCES (HORIZONTAL BAR) =====================
+const sources = [
+    { name: 'Local Markets', count: 210 },
+    { name: 'Street Vendors', count: 156 },
+    { name: 'Supermarkets', count: 132 },
+    { name: 'Food Deliver', count: 102 },
+    { name: 'Coffe/tea shops', count: 96 },
+    { name: 'Online Delivery', count: 70 },
+    { name: 'Other / Specific Mentions', count: 9 }
+];
+const maxCount = sources[0].count;
+const srcContainer = document.getElementById('sourcesChart');
+sources.forEach(s => {
+    const pct = (s.count / maxCount) * 100;
+    const intensity = 0.3 + (s.count / maxCount) * 0.7;
+    const row = document.createElement('div');
+    row.className = 'hbar-row';
+    row.innerHTML = `<div class="hbar-label">${s.name}</div><div class="hbar-track"><div class="hbar-fill" style="width:${pct}%;background:rgba(183,28,28,${intensity})">${s.count}</div></div>`;
+    srcContainer.appendChild(row);
+});
+
+
+// ===================== CHART 11: PERCEPTION GAP =====================
+new Chart(document.getElementById('perceptionGapChart'), {
+    type: 'bar',
+    data: {
+        labels: ['A little more', 'About the same', 'Less than others', 'Much less than others', 'Much more plastic than others'],
+        datasets: [
+            { label: '0 bags/week',    data: [2, 3, 3, 2, 1],     backgroundColor: '#1a9850', barPercentage: 1.0, categoryPercentage: 0.95 },
+            { label: '1-2 bags/week',  data: [37, 28, 20, 13, 9],  backgroundColor: '#91cf60', barPercentage: 1.0, categoryPercentage: 0.95 },
+            { label: '3-5 bags/week',  data: [15, 36, 26, 10, 12], backgroundColor: '#fee08b', barPercentage: 1.0, categoryPercentage: 0.95 },
+            { label: '6-10 bags/week', data: [7, 22, 12, 8, 8],    backgroundColor: '#fc8d59', barPercentage: 1.0, categoryPercentage: 0.95 },
+            { label: '10+ bags/week',  data: [6, 11, 9, 1, 3],     backgroundColor: '#d73027', barPercentage: 1.0, categoryPercentage: 0.95 }
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: {
+            padding: { left: 20, right: 20, top: 20, bottom: 10 }
+        },
+        scales: {
+            x: {
+                stacked: false,   // ← grouped
+                title: {
+                    display: true,
+                    text: 'Self-Perceived Usage Level vs. Others',
+                    font: { size: 17 },
+                    padding: { top: 12 }
+                },
+                ticks: {
+                    maxRotation: 45,
+                    minRotation: 45,
+                    font: { size: 13 }
+                }
+            },
+            y: {
+                stacked: false,   // ← grouped
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'Number of Respondents',
+                    font: { size: 14 },
+                    padding: { bottom: 12 }
+                },
+                ticks: { font: { size: 13 } }
+            }
+        },
+        plugins: {
+            legend: {
+                position: 'top',
+                align: 'end',
+                title: {
+                    display: true,
+                    text: 'Plastic Bags per Week',
+                    font: { size: 13, weight: 'bold' },
+                    padding: { bottom: 6 }
+                },
+                labels: {
+                    boxWidth: 15,
+                    font: { size: 13 },
+                    padding: 16
+                }
+            },
+            datalabels: { display: false }
+        }
+    }
+});
+   
+</script>
+
+<footer style="background-color: #1B5E20; color: #fff; padding: 40px 5% 20px; margin-top: 60px;">
+    <div style="display: flex; justify-content: space-between; gap: 40px; flex-wrap: wrap; margin-bottom: 30px;">
+        <div style="flex: 1; min-width: 220px;">
+            <h4 style="color: #A5D6A7; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;">About</h4>
+            <p style="font-size: 0.88rem; color: #C8E6C9; line-height: 1.7; margin: 0;">Hi, I'm <strong style="color: #fff;">Ei Mon Soe</strong>, a Data Science student at Parami University, Myanmar. This platform is my senior capstone project exploring the link between plastic usage and climate change in Myanmar.</p>
+        </div>
+        <div style="flex: 1; min-width: 180px;">
+            <h4 style="color: #A5D6A7; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;">Contact</h4>
+            <a href="mailto:monsoee29@gmail.com" style="display: flex; align-items: center; gap: 8px; color: #C8E6C9; text-decoration: none; font-size: 0.88rem; margin-bottom: 10px;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                monsoee29@gmail.com
+            </a>
+            <a href="https://github.com/monsoee29-lang" target="_blank" style="display: flex; align-items: center; gap: 8px; color: #C8E6C9; text-decoration: none; font-size: 0.88rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.929.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.63-5.37-12-12-12z"/></svg>
+                github.com/monsoee29-lang
+            </a>
+        </div>
+        <div style="flex: 1; min-width: 180px;">
+            <h4 style="color: #A5D6A7; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;">Connect</h4>
+            <a href="https://www.linkedin.com/in/ei-mon-soe-6aa022257/" target="_blank" style="display: flex; align-items: center; gap: 8px; color: #C8E6C9; text-decoration: none; font-size: 0.88rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                LinkedIn
+            </a>
+            
+        </div>
+    </div>
+    <div style="border-top: 1px solid rgba(255,255,255,0.15); padding-top: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <p style="margin: 0; font-size: 0.8rem; color: #A5D6A7;">© 2026 Myanmar Plastic Impact Tracker. All Rights Reserved.</p>
+        <p style="margin: 0; font-size: 0.8rem; color: #A5D6A7;">Designed by <strong style="color: #fff;">Ei Mon Soe</strong></p>
+    </div>
+</footer>
+</body>
+</html>

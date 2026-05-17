@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About the Research - Myanmar Plastic Impact</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --green-deep:  #1B5E20;
+            --green-mid:   #2E7D32;
+            --green-light: #4CAF50;
+            --green-pale:  #E8F5E9;
+            --accent:      #F9A825;
+            --ink:         #1a1a1a;
+            --muted:       #555;
+            --rule:        #e0e0e0;
+            --card-bg:     #ffffff;
+            --page-bg:     #FAFAFA;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--page-bg);
+            color: var(--ink);
+            line-height: 1.7;
+        }
+
+
+        /* ── PAGE WRAPPER ── */
+        .page-wrapper { padding: 60px 5% 80px; }
+
+        /* ── HERO / INTRO ── */
+        .hero {
+            display: flex;
+            gap: 36px;
+            align-items: center;
+            background: linear-gradient(135deg, var(--green-deep) 0%, #2E7D32 60%, #388E3C 100%);
+            border-radius: 20px;
+            padding: 40px 44px;
+            margin-bottom: 56px;
+            color: #fff;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            right: -40px; top: -40px;
+            width: 260px; height: 260px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.06);
+        }
+        .hero::after {
+            content: '';
+            position: absolute;
+            right: 60px; bottom: -60px;
+            width: 160px; height: 160px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.04);
+        }
+        .hero-photo {
+            flex-shrink: 0;
+            width: 120px; height: 120px;
+            border-radius: 50%;
+            border: 4px solid rgba(255,255,255,0.35);
+            object-fit: cover;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+        }
+        .hero-text { position: relative; z-index: 1; }
+        .hero-text h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.75rem;
+            font-weight: 900;
+            line-height: 1.2;
+            margin-bottom: 6px;
+        }
+        .hero-text .tagline {
+            font-size: 0.92rem;
+            opacity: 0.82;
+            margin-bottom: 14px;
+        }
+        .hero-badges { display: flex; flex-wrap: wrap; gap: 8px; }
+        .badge {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 20px;
+            padding: 4px 14px;
+            font-size: 0.78rem;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+        }
+
+        /* ── SECTION HEADERS ── */
+        .section-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .section-label h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            color: var(--ink);
+        }
+        .section-label .icon {
+            font-size: 1.3rem;
+        }
+        .section-rule {
+            border: none;
+            border-top: 2px solid var(--green-light);
+            margin-bottom: 24px;
+            opacity: 0.35;
+        }
+
+        /* ── PROBLEM STATEMENT ── */
+        .problem-card {
+            background: var(--card-bg);
+            border-left: 5px solid var(--green-mid);
+            border-radius: 12px;
+            padding: 28px 32px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+            margin-bottom: 48px;
+        }
+        .problem-card p { color: var(--muted); font-size: 0.97rem; margin-bottom: 14px; }
+        .problem-card p:last-child { margin-bottom: 0; }
+        .problem-card strong { color: var(--green-deep); }
+
+        /* ── SURVEY SECTION ── */
+        .survey-intro-text {
+            color: var(--muted);
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+        }
+        .questions-container {
+            background: var(--card-bg);
+            border: 1px solid var(--rule);
+            border-radius: 14px;
+            padding: 28px 32px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 48px;
+        }
+        .question-item {
+            display: flex;
+            gap: 14px;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+            align-items: flex-start;
+        }
+        .question-item:last-child { border-bottom: none; padding-bottom: 0; }
+        .question-num {
+            background: var(--green-mid);
+            color: #fff;
+            font-size: 0.72rem;
+            font-weight: 700;
+            min-width: 28px; height: 28px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; margin-top: 2px;
+        }
+        .question-text { font-size: 0.94rem; color: #333; line-height: 1.5; }
+        .question-text strong { color: var(--ink); }
+
+        /* ── DATASET DOWNLOAD ── */
+        .dataset-card {
+            background: linear-gradient(135deg, #F1F8E9 0%, #DCEDC8 100%);
+            border: 1px solid #AED581;
+            border-radius: 14px;
+            padding: 30px 34px;
+            display: flex;
+            align-items: center;
+            gap: 28px;
+            margin-bottom: 48px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        }
+        .dataset-icon { font-size: 3rem; flex-shrink: 0; }
+        .dataset-text h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.15rem;
+            color: var(--green-deep);
+            margin-bottom: 6px;
+        }
+        .dataset-text p { font-size: 0.9rem; color: #3a3a3a; margin-bottom: 16px; line-height: 1.6; }
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--green-mid);
+            color: #fff;
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 600;
+            padding: 10px 22px;
+            border-radius: 24px;
+            transition: background .2s, transform .15s;
+            box-shadow: 0 4px 12px rgba(46,125,50,0.3);
+        }
+        .download-btn:hover { background: var(--green-deep); transform: translateY(-2px); }
+        .download-btn svg { width: 16px; height: 16px; fill: currentColor; }
+
+        /* ── METHODOLOGY NOTE ── */
+        .info-box {
+            background: #E3F2FD;
+            border: 1px solid #90CAF9;
+            border-radius: 12px;
+            padding: 18px 22px;
+            font-size: 0.92rem;
+            color: #1a1a1a;
+            line-height: 1.6;
+            margin-bottom: 48px;
+        }
+
+        /* ── ACKNOWLEDGEMENTS ── */
+        .ack-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin-bottom: 48px;
+        }
+        @media (max-width: 600px) { .ack-grid { grid-template-columns: 1fr; } }
+        .ack-card {
+            background: var(--card-bg);
+            border: 1px solid var(--rule);
+            border-radius: 14px;
+            padding: 24px 26px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            position: relative;
+            overflow: hidden;
+        }
+        .ack-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--green-mid), var(--green-light));
+        }
+        .ack-card .ack-emoji { font-size: 1.8rem; margin-bottom: 10px; display: block; }
+        .ack-card h4 { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--green-mid); margin-bottom: 6px; }
+        .ack-card p { font-size: 0.93rem; color: #333; line-height: 1.5; }
+        .ack-card .name { font-weight: 700; color: var(--ink); font-size: 1rem; }
+
+        .ack-full {
+            background: var(--card-bg);
+            border: 1px solid var(--rule);
+            border-radius: 14px;
+            padding: 28px 32px;
+            margin-bottom: 48px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            font-size: 0.95rem;
+            color: var(--muted);
+            line-height: 1.8;
+            position: relative;
+            overflow: hidden;
+        }
+        .ack-full::before {
+            content: '"';
+            font-family: 'Playfair Display', serif;
+            font-size: 8rem;
+            color: var(--green-pale);
+            position: absolute;
+            top: -20px; left: 16px;
+            line-height: 1;
+            z-index: 0;
+        }
+        .ack-full p { position: relative; z-index: 1; }
+        .ack-full strong { color: var(--green-deep); }
+
+        /* ── SECTION SPACING ── */
+        .section { margin-bottom: 52px; }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 640px) {
+            .hero { flex-direction: column; text-align: center; padding: 30px 24px; }
+            .hero-badges { justify-content: center; }
+            .dataset-card { flex-direction: column; text-align: center; }
+            .questions-container { padding: 18px 16px; }
+            .problem-card { padding: 20px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SHARED HEADER -->
+    <header>
+        <nav>
+            <a href="index.html"     class="nav-link">Home</a>
+            <a href="dashboard.html" class="nav-link">EDA Dashboard</a>
+            <a href="tracker.html"   class="nav-link">CO₂ Tracker</a>
+            <a href="research.html"  class="nav-link active">About Project</a>
+            <a href="https://www.linkedin.com/in/ei-mon-soe-6aa022257/" class="connect-btn">Connect on LinkedIn</a>
+        </nav>
+    </header>
+
+    <div class="page-wrapper">
+
+        <!-- ── HERO / RESEARCHER INTRO ── -->
+        <div class="hero">
+            <img src="images/eimonsoe.png" alt="Ei Mon Soe" class="hero-photo">
+            <div class="hero-text">
+                <h1 style="color: #ffffff;">Analysis of Single-Use Plastics’ Consumption in Myanmar and Its Contribution to Climate Change</h1>
+                <p class="tagline">Senior Capstone Project · Statistics and Data Science · Parami University</p>
+                <div class="hero-badges">
+                    <span class="badge">👩‍🎓 Ei Mon Soe</span>
+                    <span class="badge">🏫 Parami University</span>
+                    <span class="badge">📊 n = 304 Participants</span>
+                    <span class="badge">🌏 Myanmar Context</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── PROBLEM STATEMENT ── -->
+        <div class="section">
+            <div class="section-label">
+                <span class="icon">🌿</span>
+                <h2>Problem Statement</h2>
+            </div>
+            <hr class="section-rule">
+            <div class="problem-card">
+                <p>
+                    Myanmar faces a growing plastic pollution crisis, yet individual awareness of how everyday plastic consumption links to broader climate change remains largely unmeasured. While global discourse on plastic waste is well-documented, <strong>localised, community-level data from Myanmar is virtually absent</strong> in the academic and policy landscape.
+                </p>
+                <p>
+                    This project asks: <strong>To what extent do people in Myanmar understand the relationship between their single-use plastic habits and climate change outcomes</strong> — specifically CO₂ emissions from open burning and landfill accumulation?
+                </p>
+                <p>
+                    By surveying 304 participants across multiple regions and states, this project bridges the gap between <strong>individual consumption behaviour</strong> and <strong>systemic environmental impact</strong>, producing an open dataset and interactive visualisation platform to support further research and public education.
+                </p>
+            </div>
+        </div>
+
+        <!-- ── FULL SURVEY INSTRUMENT ── -->
+        <div class="section">
+            <div class="section-label">
+                <span class="icon">📋</span>
+                <h2>Full Survey Instrument</h2>
+            </div>
+            <hr class="section-rule">
+            <p class="survey-intro-text">The following 22 questions were presented to all 304 participants. The survey covered plastic usage habits, disposal behaviours, environmental awareness, and climate change perceptions.</p>
+
+            <div class="questions-container">
+                <div class="question-item"><div class="question-num">1</div><div class="question-text"><strong>Your Location</strong> — General geographic area</div></div>
+                <div class="question-item"><div class="question-num">2</div><div class="question-text"><strong>Your Region / State</strong> — Specific administrative division</div></div>
+                <div class="question-item"><div class="question-num">3</div><div class="question-text"><strong>What is your age group?</strong></div></div>
+                <div class="question-item"><div class="question-num">4</div><div class="question-text"><strong>What is your approximate monthly household income? (MMK)</strong></div></div>
+                <div class="question-item"><div class="question-num">5</div><div class="question-text"><strong>What is the highest level of education you have completed?</strong></div></div>
+                <div class="question-item"><div class="question-num">6</div><div class="question-text"><strong>How often do you use single-use plastic items in your weekly life?</strong></div></div>
+                <div class="question-item"><div class="question-num">7</div><div class="question-text"><strong>Which single-use plastic items do you usually use in your weekly life?</strong></div></div>
+                <div class="question-item"><div class="question-num">8</div><div class="question-text"><strong>Where do you usually get your single-use plastic from?</strong></div></div>
+                <div class="question-item"><div class="question-num">9</div><div class="question-text"><strong>How many plastic bags do you usually get from shops or markets per week?</strong></div></div>
+                <div class="question-item"><div class="question-num">10</div><div class="question-text"><strong>When buying street food or market food, how often does it come in plastic?</strong></div></div>
+                <div class="question-item"><div class="question-num">11</div><div class="question-text"><strong>Compared to what you see outside, do you think you personally use:</strong> (self-perception scale)</div></div>
+                <div class="question-item"><div class="question-num">12</div><div class="question-text"><strong>What do you often do with your plastic waste after you use the product?</strong></div></div>
+                <div class="question-item"><div class="question-num">13</div><div class="question-text"><strong>What do you think happens to the plastic you throw in the bin in your region?</strong></div></div>
+                <div class="question-item"><div class="question-num">14</div><div class="question-text"><strong>How aware are you that plastic production and disposal contributes to climate change?</strong></div></div>
+                <div class="question-item"><div class="question-num">15</div><div class="question-text"><strong>Do you believe current plastic usage in Myanmar is contributing to climate change?</strong></div></div>
+                <div class="question-item"><div class="question-num">16</div><div class="question-text"><strong>When do you think the effects of today's plastic usage on climate change will become noticeable?</strong></div></div>
+                <div class="question-item"><div class="question-num">17</div><div class="question-text"><strong>Would you support reducing single-use plastics or replacing them with alternatives?</strong></div></div>
+                <div class="question-item"><div class="question-num">18</div><div class="question-text"><strong>Do you think that plastic waste is burned?</strong></div></div>
+                <div class="question-item"><div class="question-num">19</div><div class="question-text"><strong>What percentage of plastic waste do you think is burned?</strong></div></div>
+                <div class="question-item"><div class="question-num">20</div><div class="question-text"><strong>Do you think that plastic waste usually ends up in a landfill site?</strong></div></div>
+                <div class="question-item"><div class="question-num">21</div><div class="question-text"><strong>What percentage of plastic waste ends up in a landfill or dumping ground?</strong></div></div>
+                <div class="question-item"><div class="question-num">22</div><div class="question-text"><strong>How do you think plastic waste in landfills and open burning affects climate change?</strong></div></div>
+            </div>
+        </div>
+
+        <!-- ── METHODOLOGY NOTE ── -->
+        <div class="info-box" style="margin-bottom: 52px;">
+            💡 <strong>Methodology Note:</strong> This survey was designed to bridge the gap between individual consumption habits and systemic environmental outcomes in the Myanmar context. It was distributed across multiple regions and states to capture geographic diversity in perception and behaviour.
+        </div>
+
+        <!-- ── OPEN DATASET ── -->
+        <div class="section">
+            <div class="section-label">
+                <span class="icon">📂</span>
+                <h2>Open Dataset</h2>
+            </div>
+            <hr class="section-rule">
+            <div class="dataset-card">
+                <div class="dataset-icon">🗃️</div>
+                <div class="dataset-text">
+                    <h3>Download the Survey Dataset</h3>
+                    <p>
+                        As announced to participants, this dataset is made publicly available to support further research, education, and independent analysis. It contains anonymised responses from all 304 participants across 22 survey questions.
+                        Feel free to use it for your own exploratory data analysis, visualisations, or academic work — just credit the source.
+                    </p>
+                    <p style="font-size: 0.88rem; color: #555; margin-top: 8px;">
+                        ⚠️ <em>This is a sample dataset. For the full 304-response dataset, email 
+                        <a href="mailto:monsoee29@gmail.com" style="color: #2E7D32; font-weight: 600;">monsoee29@gmail.com</a>.</em>
+                    </p>
+                    <a href="Survey_Dataset_Ei Mon Soe.csv" download class="download-btn">
+                        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 16l-5-5 1.4-1.4 2.6 2.6V4h2v8.2l2.6-2.6L17 11l-5 5zm-7 2h14v2H5v-2z"/></svg>
+                        Download Sample CSV
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── ACKNOWLEDGEMENTS ── -->
+        <div class="section">
+            <div class="section-label">
+                <span class="icon">🙏</span>
+                <h2>Acknowledgements</h2>
+            </div>
+            <hr class="section-rule">
+
+            <div class="ack-grid">
+                <div class="ack-card">
+                    <span class="ack-emoji">👩‍🏫</span>
+                    <h4>Course Advisor</h4>
+                    <p class="name">Dr. Nwe Nwe Htay Win</p>
+                    <p>Parami University — for her generous guidance, thoughtful mentorship, and continued support throughout this capstone journey.</p>
+                </div>
+                <div class="ack-card">
+                    <span class="ack-emoji">📊</span>
+                    <h4>Supervisor</h4>
+                    <p class="name">Dr. Mohamed Megheib</p>
+                    <p>Parami University — for invaluable advice on research design, statistical rigour, and analytical approach.</p>
+                </div>
+            </div>
+
+            <div class="ack-full">
+                <p>
+                    I extend my heartfelt gratitude to the <strong>304 participants</strong> who took time to share their perspectives, habits, and knowledge on plastic usage in Myanmar. Without your honest and thoughtful responses, this research would not exist. Your voices form the foundation of every chart, every insight, and every recommendation on this platform.
+                </p>
+                <br>
+                <p>
+                    I also thank <strong> the faculty and staff of the Division of Mathematics and Science at Parami University</strong> for providing the academic foundation and resources that made this project possible. I would like to dedicate this work to my family and friends, whose unwavering support, encouragement, and belief in me have carried me through the challenges of my final year. Completing this research required persistence, curiosity, and continuous learning throughout the capstone journey.</p>
+            </div>
+        </div>
+
+    </div><!-- /page-wrapper -->
+<footer style="background-color: #1B5E20; color: #fff; padding: 40px 5% 20px; margin-top: 60px;">
+    <div style="display: flex; justify-content: space-between; gap: 40px; flex-wrap: wrap; margin-bottom: 30px;">
+        
+        <!-- About Me -->
+        <div style="flex: 1; min-width: 220px;">
+            <h4 style="color: #A5D6A7; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;">About</h4>
+            <p style="font-size: 0.88rem; color: #C8E6C9; line-height: 1.7; margin: 0;">
+                Hi, I'm <strong style="color: #fff;">Ei Mon Soe</strong>, a Data Science student at Parami University, Myanmar. 
+                This platform is my senior capstone project exploring the link between plastic usage and climate change in Myanmar.
+            </p>
+        </div>
+
+        <!-- Contact -->
+        <div style="flex: 1; min-width: 180px;">
+            <h4 style="color: #A5D6A7; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;">Contact</h4>
+            <a href="mailto:youremail@gmail.com" style="display: flex; align-items: center; gap: 8px; color: #C8E6C9; text-decoration: none; font-size: 0.88rem; margin-bottom: 10px;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                monsoee29@gmail.com
+            </a>
+            <a href="https://github.com/monsoee29-lang" target="_blank" style="display: flex; align-items: center; gap: 8px; color: #C8E6C9; text-decoration: none; font-size: 0.88rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.929.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.63-5.37-12-12-12z"/></svg>
+                github.com/monsoee29-lang
+            </a>
+        </div>
+
+        <!-- LinkedIn -->
+        <div style="flex: 1; min-width: 180px;">
+            <h4 style="color: #A5D6A7; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px;">Connect</h4>
+            <a href="https://www.linkedin.com/in/ei-mon-soe-6aa022257/" target="_blank" style="display: flex; align-items: center; gap: 8px; color: #C8E6C9; text-decoration: none; font-size: 0.88rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                LinkedIn
+            </a>
+            
+        </div>
+
+    </div>
+
+    <!-- Bottom Bar -->
+    <div style="border-top: 1px solid rgba(255,255,255,0.15); padding-top: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <p style="margin: 0; font-size: 0.8rem; color: #A5D6A7;">
+            © 2026 Myanmar Plastic Impact Tracker. All Rights Reserved.
+        </p>
+        <p style="margin: 0; font-size: 0.8rem; color: #A5D6A7;">
+            Designed by <strong style="color: #fff;">Ei Mon Soe</strong>
+        </p>
+    </div>
+
+</footer>
+</body>
+</html>
